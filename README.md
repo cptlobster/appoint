@@ -8,6 +8,16 @@ Appoint is a flexible appointment scheduling software.
 - Appointments can have multiple slots, so people can sign up for the same time (this can be configured per calendar).
 - Event reminders / ICS files for importing can be sent via email, or can be directly added to calendars (integration for Google Calendar / Outlook coming At Some Point&trade;)
 
+## Installation
+Coming soon
+
+## Architecture
+Appoint consists of two components:
+- The [backend](backend/README.md), a Scalatra service that handles all of the backend logic.
+- The [frontend](frontend/README.md), a SvelteKit webapp which end users will interact with.
+
+The backend will connect with a database (likely Postgres, to be implemented) for data persistence. The full stack can be launched using the [Docker Compose](compose.yml) file at the root of this repository. Nix derivations will also be added at a later date.
+
 ## License
 This program is licensed under the [GNU General Public License, version 3](LICENSE.md).
 
