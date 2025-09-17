@@ -1,0 +1,15 @@
+:root {
+    --background-color: hsl(210, 50%, 10%);
+    --text-color: hsl(210, 50%, 80%);
+    --text-inactive-color: hsl(210, 50%, 50%);
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    min-height: 100dvh;
+}
+
+main {
+    padding: 2rem 5vw;
+}
