@@ -22,7 +22,7 @@ import java.util.UUID
 case class Appointment(
                  id: UUID = UUID.randomUUID(),
                  name: String,
-                 host: Contact,
+                 host: Host,
                  guests: List[Contact],
                  start: Instant,
                  length: Duration,

@@ -1,18 +1,20 @@
 package dev.cptlobster.appoint.scheduler
 
+import dev.cptlobster.appoint.scheduler.selector.{HostSelector, LRUHostSelector}
+
 import java.time.{Duration, Instant}
 import java.util.UUID
 import scala.util.Try
 
-class AppointmentSchedule(
-                           id: UUID,
-                           name: String,
-                           hosts: List[Contact],
-                           appointmentLength: Duration,
-                           schedulingRange: (Duration, Duration),
-                           bufferTime: Duration = Duration.ZERO,
-                           description: String = ""
-                         ) {
+case class AppointmentSchedule(id: UUID = UUID.randomUUID(),
+                               name: String,
+                               hosts: List[Host],
+                               appointmentLength: Duration,
+                               schedulingRange: (Duration, Duration),
+                               bufferTime: Duration = Duration.ZERO,
+                               description: String = "",
+                               hostSelectionStrategy: HostSelector = LRUHostSelector(),
+                               appointments: List[Appointment] = List()) {
   val bufferBetweenStarts: Duration = appointmentLength.plus(bufferTime)
 
   /**
@@ -20,7 +22,11 @@ class AppointmentSchedule(
    * @param starting The date to start searching from.
    * @return All available appointment slots within the scheduling range.
    */
-  def getSlots(starting: Instant): List[Instant] = ???
+  def getSlots(starting: Instant): List[Slot] = {
+    hosts.map(_.slots(this, starting)).reduce((left, right) => {
+      ???
+    })
+  }
 
   /**
    * Try to schedule an appointment in an appointment slot.
@@ -28,7 +34,7 @@ class AppointmentSchedule(
    * @return A [[Try]] containing the result of scheduling; if successful, returns an [[Appointment]]; otherwise returns
    *         an [[Exception]] with the reason that the appointment cannot be scheduled.
    */
-  def schedule(slot: Instant): Try[Appointment] = ???
+  def schedule(slot: Slot): Try[Appointment] = ???
 
   /**
    * Cancel an appointment completely.
