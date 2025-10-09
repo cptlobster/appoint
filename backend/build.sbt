@@ -10,6 +10,7 @@ lazy val hello = (project in file("."))
     libraryDependencies ++= Seq(
       "org.scalatra" %% "scalatra-jakarta" % ScalatraVersion,
       "org.scalatra" %% "scalatra-json-jakarta" % ScalatraVersion,
+      "org.scalatra" %% "scalatra-swagger-jakarta" % ScalatraVersion,
       "org.scalatra" %% "scalatra-scalatest-jakarta" % ScalatraVersion % "test",
       "org.json4s"   %% "json4s-jackson" % "4.0.6",
       "org.mnode.ical4j" % "ical4j" % "4.1.1",
