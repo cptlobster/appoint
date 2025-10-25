@@ -1,8 +1,5 @@
 package dev.cptlobster.appoint
 
-import dev.cptlobster.appoint.scheduler.AppointmentSchedule
-import dev.cptlobster.appoint.scheduler.builder.ScheduleOverlay
-import dev.cptlobster.appoint.scheduler.builder.overrides.CustomOverride
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.*
 import org.scalatra.json.*
@@ -21,7 +18,7 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   }
 
   private val getSchedules = (
-    apiOperation[List[AppointmentSchedule]]("getSchedules")
+    apiOperation[List[String]]("getSchedules")
       summary "List all appointment schedules for a user"
     )
 
@@ -31,7 +28,7 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   }
 
   private val getScheduleInfo = (
-    apiOperation[AppointmentSchedule]("getScheduleInfo")
+    apiOperation[String]("getScheduleInfo")
       summary "Get information on the selected appointment schedule."
       parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
     )
@@ -46,7 +43,7 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   }
 
   private val getScheduleOverlays = (
-    apiOperation[List[ScheduleOverlay]]("getScheduleOverlays")
+    apiOperation[List[String]]("getScheduleOverlays")
       summary "List all configured schedule overlays."
       parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
     )
@@ -57,7 +54,7 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   }
 
   private val getScheduleOverrides = (
-    apiOperation[List[CustomOverride]]("getScheduleOverlays")
+    apiOperation[List[String]]("getScheduleOverlays")
       summary "List all configured custom overrides for a schedule."
       parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
     )
@@ -79,7 +76,7 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   }
 
   private val createSchedule = (
-    apiOperation[AppointmentSchedule]("createSchedule")
+    apiOperation[String]("createSchedule")
       summary "Create a new appointment schedule."
     )
 
@@ -89,7 +86,7 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   }
 
   private val modifySchedule = (
-    apiOperation[AppointmentSchedule]("modifySchedule")
+    apiOperation[String]("modifySchedule")
       summary "Modify an existing appointment schedule."
       parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
     )

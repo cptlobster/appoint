@@ -1,6 +1,5 @@
 package dev.cptlobster.appoint
 
-import dev.cptlobster.appoint.scheduler.Appointment
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.*
 import org.scalatra.json.*
@@ -19,7 +18,7 @@ class AppointmentServlet(implicit val swagger: Swagger) extends ScalatraServlet 
   }
 
   private val getAppointments = (
-    apiOperation[List[Appointment]]("getAppointments")
+    apiOperation[List[String]]("getAppointments")
       summary "List all appointments for a user"
   )
 
@@ -29,7 +28,7 @@ class AppointmentServlet(implicit val swagger: Swagger) extends ScalatraServlet 
   }
 
   private val getAppointment = (
-    apiOperation[Appointment]("getAppointment")
+    apiOperation[String]("getAppointment")
       summary "Get information for a specific appointment"
       parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
     )
@@ -44,7 +43,7 @@ class AppointmentServlet(implicit val swagger: Swagger) extends ScalatraServlet 
   }
 
   private val modifyAppointment = (
-    apiOperation[Appointment]("modifyAppointment")
+    apiOperation[String]("modifyAppointment")
       summary "Modify details of a scheduled appointment"
       parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
     )
