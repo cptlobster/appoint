@@ -26,4 +26,18 @@ public class Appointment {
     public Instant timestamp;
     @Column(nullable = false)
     public Duration length;
+    
+    public Appointment() {}
+    
+    public Appointment(UUID id, AppointmentSchedule schedule, Set<Guest> guests, Instant timestamp, Duration length) {
+        this.id = id;
+        this.schedule = schedule;
+        this.guests = guests;
+        this.timestamp = timestamp;
+        this.length = length;
+    }
+    
+    public Appointment(AppointmentSchedule schedule, Set<Guest> guests, Instant timestamp, Duration length) {
+        this(UUID.randomUUID(), schedule, guests, timestamp, length)
+    }
 }

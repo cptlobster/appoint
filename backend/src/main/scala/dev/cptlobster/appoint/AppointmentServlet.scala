@@ -1,5 +1,7 @@
 package dev.cptlobster.appoint
 
+import dev.cptlobster.appoint.orm.Appointment
+import jakarta.persistence.NoResultException
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.*
 import org.scalatra.json.*
@@ -7,24 +9,42 @@ import org.scalatra.swagger.*
 
 import java.util.UUID
 import scala.util.{Failure, Success, Try}
+import jakarta.servlet.ServletConfig
 
-class AppointmentServlet(implicit val swagger: Swagger) extends ScalatraServlet with JacksonJsonSupport with SwaggerSupport {
+import scala.jdk.CollectionConverters.*
+
+class AppointmentServlet(implicit val swagger: Swagger)
+  extends ScalatraServlet
+    with JacksonJsonSupport
+    with SwaggerSupport
+    with HibernateConnection {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
   protected val applicationDescription = "The Appoint scheduling system API. Exposes operations to manage appointments and appointment schedules."
+
+  override def init(config: ServletConfig): Unit = {
+    super.init(config)
+    sessionFactory.getSchemaManager.create(true)
+  }
 
   before() {
     contentType = formats("json")
   }
 
   private val getAppointments = (
-    apiOperation[List[String]]("getAppointments")
+    apiOperation[List[Appointment]]("getAppointments")
       summary "List all appointments for a user"
   )
 
   // get list of appointments for user
   get("/", operation(getAppointments)) {
-    "[]"
+    val appointments = sessionFactory.fromTransaction((session) => {
+      val query = "from appointments"
+      session.createSelectionQuery(query, classOf[Appointment])
+        .getResultList
+        .asScala
+    })
+    appointments
   }
 
   private val getAppointment = (
@@ -37,7 +57,18 @@ class AppointmentServlet(implicit val swagger: Swagger) extends ScalatraServlet 
   get("/:uuid", operation(getAppointment)) {
     val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
     uuidTry match {
-      case Success(uuid) => s"{\"id\":\"${uuid.toString}\"}"
+      case Success(uuid) =>
+        var appointment = Try(sessionFactory.fromTransaction((session) => {
+          val query = "from appointments where id = :uuid"
+          session.createSelectionQuery(query, classOf[Appointment])
+            .setParameter("uuid", uuid)
+            .getSingleResult
+        })) match {
+        case Success(a) => a
+        case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find appointment with ID $uuid.\"}")
+        case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
+        }
+        appointment
       case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
     }
   }

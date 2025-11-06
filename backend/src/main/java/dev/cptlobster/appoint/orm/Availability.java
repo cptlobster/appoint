@@ -21,4 +21,17 @@ public class Availability {
     public LocalTime start;
     @Column(nullable = false)
     public LocalTime end;
+    
+    public Availability() {}
+    
+    public Availability(UUID id, DayOfWeek weekday, LocalTime start, LocalTime end) {
+        this.id = id;
+        this.weekday = weekday;
+        this.start = start;
+        this.end = end;
+    }
+    
+    public Availability(DayOfWeek weekday, LocalTime start, LocalTime end) {
+        this(UUID.randomUUID(), weekday, start, end)
+    }
 }

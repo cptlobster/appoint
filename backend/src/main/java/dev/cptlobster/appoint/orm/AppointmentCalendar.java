@@ -20,4 +20,17 @@ public class AppointmentCalendar {
     @Column(nullable = false)
     public String name;
     public String description;
+
+    public AppointmentCalendar() {}
+
+    public AppointmentCalendar(UUID id, Set<AppointmentSchedule> schedules, String name, String description) {
+        this.id = id;
+        this.schedules = schedules;
+        this.name = name;
+        this.description = description;
+    }
+
+    public AppointmentCalendar(Set<AppointmentSchedule> schedules, String name, String description) {
+        this(UUID.randomUUID(), schedules, name, description)
+    }
 }

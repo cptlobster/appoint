@@ -1,17 +1,30 @@
 package dev.cptlobster.appoint
 
+import dev.cptlobster.appoint.orm.AppointmentSchedule
+import jakarta.persistence.NoResultException
+import jakarta.servlet.ServletConfig
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.*
 import org.scalatra.json.*
 import org.scalatra.swagger.*
 
+import scala.jdk.CollectionConverters.*
 import java.util.UUID
 import scala.util.{Failure, Success, Try}
 
-class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet with JacksonJsonSupport with SwaggerSupport {
+class ScheduleServlet(implicit val swagger: Swagger)
+  extends ScalatraServlet
+    with JacksonJsonSupport
+    with SwaggerSupport
+    with HibernateConnection {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
   protected val applicationDescription = "The Appoint scheduling system API. Exposes operations to manage appointments and appointment schedules."
+
+  override def init(config: ServletConfig): Unit = {
+    super.init(config)
+    sessionFactory.getSchemaManager.create(true)
+  }
 
   before() {
     contentType = formats("json")
@@ -24,7 +37,13 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
 
   // get all schedules for a user
   get("/", operation(getSchedules)) {
-    "[]"
+    val schedules = sessionFactory.fromTransaction((session) => {
+      val query = "from schedules"
+      session.createSelectionQuery(query, classOf[AppointmentSchedule])
+        .getResultList
+        .asScala
+    })
+    schedules
   }
 
   private val getScheduleInfo = (
@@ -37,7 +56,17 @@ class ScheduleServlet(implicit val swagger: Swagger) extends ScalatraServlet wit
   get("/:uuid", operation(getScheduleInfo)) {
     val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
     uuidTry match {
-      case Success(uuid) => s"{\"id\":\"${uuid.toString}\"}"
+      case Success(uuid) =>
+        val schedule = Try(sessionFactory.fromTransaction((session) => {
+          val query = "from schedules"
+          session.createSelectionQuery(query, classOf[AppointmentSchedule])
+            .getSingleResult
+        })) match {
+          case Success(a) => a
+          case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find schedule with ID $uuid.\"}")
+          case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
+        }
+        schedule
       case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
     }
   }
