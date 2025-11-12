@@ -2,6 +2,7 @@ package dev.cptlobster.appoint.orm;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -18,6 +19,8 @@ public class Guest {
     @Column(nullable = false)
     public String email;
     public String phone;
+    @ManyToMany
+    public Set<Appointment> appointments;
 
     public Guest() {}
 
@@ -29,14 +32,14 @@ public class Guest {
     }
     
     public Guest(UUID id, String name, String email) {
-        this(id, name, email, null)
+        this(id, name, email, null);
     }
     
     public Guest(String name, String email, String phone) {
-        this(UUID.randomUUID(), name, email, phone)
+        this(UUID.randomUUID(), name, email, phone);
     }
     
     public Guest(String name, String email) {
-        this(name, email, null)
+        this(name, email, null);
     }
 }

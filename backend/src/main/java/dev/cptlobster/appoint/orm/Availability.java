@@ -32,6 +32,6 @@ public class Availability {
     }
     
     public Availability(DayOfWeek weekday, LocalTime start, LocalTime end) {
-        this(UUID.randomUUID(), weekday, start, end)
+        this(UUID.randomUUID(), weekday, start, end);
     }
 }

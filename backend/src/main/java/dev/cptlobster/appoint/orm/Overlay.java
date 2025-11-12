@@ -14,7 +14,7 @@ public class Overlay {
     @Id
     @GeneratedValue
     public UUID id;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 512)
     public URL url;
 
     public Overlay() {}
@@ -25,22 +25,22 @@ public class Overlay {
     }
 
     public Overlay(UUID id, URI uri) throws MalformedURLException {
-        this(id, uri.toURL())
+        this(id, uri.toURL());
     }
 
     public Overlay(UUID id, String url) throws URISyntaxException, MalformedURLException {
-        this(id, new URI(url))
+        this(id, new URI(url));
     }
 
     public Overlay(URL url) {
-        this(UUID.randomUUID(), url)
+        this(UUID.randomUUID(), url);
     }
 
     public Overlay(URI uri) throws MalformedURLException {
-        this(uri.toURL())
+        this(uri.toURL());
     }
 
     public Overlay(String url) throws URISyntaxException, MalformedURLException {
-        this(new URI(url))
+        this(new URI(url));
     }
 }

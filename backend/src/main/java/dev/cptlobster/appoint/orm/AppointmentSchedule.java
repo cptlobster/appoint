@@ -16,15 +16,18 @@ public class AppointmentSchedule {
     @GeneratedValue
     public UUID id;
     @OneToMany
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "schedule_id", nullable = false)
     public Set<Availability> availabilities;
     @OneToMany
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "schedule_id", nullable = false)
     public Set<Overlay> overlays;
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "host_id", nullable = false)
     public Host host;
     @Column(nullable = false)
     public Duration appointmentLength;
+    @Column(nullable = false)
     public Duration bufferTime = Duration.ZERO;
+    @OneToMany
+    public Set<Appointment> appointments;
 }

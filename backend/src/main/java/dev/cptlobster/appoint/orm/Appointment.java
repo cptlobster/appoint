@@ -17,10 +17,14 @@ public class Appointment {
     @GeneratedValue
     public UUID id;
     @ManyToOne
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "schedule_id")
     public AppointmentSchedule schedule;
     @ManyToMany
-    @JoinColumn(name = "id")
+    @JoinTable(
+        name = "appointment_guests",
+        joinColumns = { @JoinColumn(name = "appointment_id") },
+        inverseJoinColumns = { @JoinColumn(name = "guest_id") }
+    )
     public Set<Guest> guests;
     @Column(nullable = false)
     public Instant timestamp;
@@ -38,6 +42,6 @@ public class Appointment {
     }
     
     public Appointment(AppointmentSchedule schedule, Set<Guest> guests, Instant timestamp, Duration length) {
-        this(UUID.randomUUID(), schedule, guests, timestamp, length)
+        this(UUID.randomUUID(), schedule, guests, timestamp, length);
     }
 }

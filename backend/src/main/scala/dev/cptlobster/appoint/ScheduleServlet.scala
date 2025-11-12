@@ -26,19 +26,28 @@ class ScheduleServlet(implicit val swagger: Swagger)
     sessionFactory.getSchemaManager.create(true)
   }
 
+  def getUuid: UUID = {
+    val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
+    uuidTry match {
+      case Success(uuid) => uuid
+      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
+    }
+  }
+
   before() {
     contentType = formats("json")
   }
 
-  private val getSchedules = (
-    apiOperation[List[String]]("getSchedules")
-      summary "List all appointment schedules for a user"
-    )
+//  private val getSchedules = (
+//    apiOperation[List[String]]("getSchedules")
+//      summary "List all appointment schedules for a user"
+//    )
 
-  // get all schedules for a user
-  get("/", operation(getSchedules)) {
+  // get all schedules for a user\
+//   get("/", operation(getSchedules)) {
+  get("/") {
     val schedules = sessionFactory.fromTransaction((session) => {
-      val query = "from schedules"
+      val query = "from AppointmentSchedule"
       session.createSelectionQuery(query, classOf[AppointmentSchedule])
         .getResultList
         .asScala
@@ -46,93 +55,100 @@ class ScheduleServlet(implicit val swagger: Swagger)
     schedules
   }
 
-  private val getScheduleInfo = (
-    apiOperation[String]("getScheduleInfo")
-      summary "Get information on the selected appointment schedule."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
-    )
+//  private val getScheduleInfo = (
+//    apiOperation[String]("getScheduleInfo")
+//      summary "Get information on the selected appointment schedule."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
+//    )
 
   // get details for a schedule
-  get("/:uuid", operation(getScheduleInfo)) {
-    val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
-    uuidTry match {
-      case Success(uuid) =>
-        val schedule = Try(sessionFactory.fromTransaction((session) => {
-          val query = "from schedules"
-          session.createSelectionQuery(query, classOf[AppointmentSchedule])
-            .getSingleResult
-        })) match {
-          case Success(a) => a
-          case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find schedule with ID $uuid.\"}")
-          case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
-        }
-        schedule
-      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
+// get("/:uuid", operation(getScheduleInfo)) {
+  get("/:uuid") {
+    val uuid = getUuid
+    val schedule = Try(sessionFactory.fromTransaction(session => {
+      val query = "from AppointmentSchedule"
+      session.createSelectionQuery(query, classOf[AppointmentSchedule])
+        .getSingleResult
+    })) match {
+      case Success(a) => a
+      case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find schedule with ID $uuid.\"}")
+      case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
     }
+    schedule
   }
 
-  private val getScheduleOverlays = (
-    apiOperation[List[String]]("getScheduleOverlays")
-      summary "List all configured schedule overlays."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
-    )
+//  private val getScheduleOverlays = (
+//    apiOperation[List[String]]("getScheduleOverlays")
+//      summary "List all configured schedule overlays."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
+//    )
 
   // get schedule overlays
-  get("/:uuid/overlays", operation(getScheduleOverlays)) {
+// get("/:uuid/overlays", operation(getScheduleOverlays)) {
+  get("/:uuid/overlays") {
+    val uuid = getUuid
     "{\"implemented\":false}"
   }
 
-  private val getScheduleOverrides = (
-    apiOperation[List[String]]("getScheduleOverlays")
-      summary "List all configured custom overrides for a schedule."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
-    )
+//  private val getScheduleOverrides = (
+//    apiOperation[List[String]]("getScheduleOverlays")
+//      summary "List all configured custom overrides for a schedule."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
+//    )
+//
+//  // get schedule overrides
+//  get("/:uuid/overrides", operation(getScheduleOverrides)) {
+//    val uuid = getUuid
+//    "{\"implemented\":false}"
+//  }
+//
+//  private val createScheduleOverride = (
+//    apiOperation[Unit]("createScheduleOverride")
+//      summary "Create a new custom override on the appointment schedule."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
+//    )
+//
+//  // add a new schedule override
+//  post("/:uuid/overrides", operation(createScheduleOverride)) {
+//    val uuid = getUuid
+//    "{\"implemented\":false}"
+//  }
 
-  // get schedule overrides
-  get("/:uuid/overrides", operation(getScheduleOverrides)) {
-    "{\"implemented\":false}"
-  }
-
-  private val createScheduleOverride = (
-    apiOperation[Unit]("createScheduleOverride")
-      summary "Create a new custom override on the appointment schedule."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
-    )
-
-  // add a new schedule override
-  post("/:uuid/overrides", operation(createScheduleOverride)) {
-    "{\"implemented\":false}"
-  }
-
-  private val createSchedule = (
-    apiOperation[String]("createSchedule")
-      summary "Create a new appointment schedule."
-    )
+//  private val createSchedule = (
+//    apiOperation[String]("createSchedule")
+//      summary "Create a new appointment schedule."
+//    )
 
   // create a schedule
-  post("/", operation(createSchedule)) {
+//  post("/", operation(createSchedule)) {
+  post("/") {
+    val uuid = getUuid
     "{\"implemented\":false}"
   }
 
-  private val modifySchedule = (
-    apiOperation[String]("modifySchedule")
-      summary "Modify an existing appointment schedule."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
-    )
+//  private val modifySchedule = (
+//    apiOperation[String]("modifySchedule")
+//      summary "Modify an existing appointment schedule."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
+//    )
 
   // modify an appointment schedule
-  patch("/:uuid", operation(modifySchedule)) {
+//  patch("/:uuid", operation(modifySchedule)) {
+  patch("/:uuid") {
+    val uuid = getUuid
     "{\"implemented\":false}"
   }
 
-  private val deleteSchedule = (
-    apiOperation[Unit]("deleteSchedule")
-      summary "Delete an existing appointment schedule."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
-    )
+//  private val deleteSchedule = (
+//    apiOperation[Unit]("deleteSchedule")
+//      summary "Delete an existing appointment schedule."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment schedule")
+//    )
 
   // delete an appointment schedule
-  delete("/:uuid", operation(deleteSchedule)) {
+// delete(":/uuid", operation(deleteSchedule)) {
+  delete("/:uuid") {
+    val uuid = getUuid
     "{\"implemented\":false}"
   }
 

@@ -15,10 +15,11 @@ public class AppointmentCalendar {
     @GeneratedValue
     public UUID id;
     @OneToMany
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "calendar_id")
     public Set<AppointmentSchedule> schedules;
     @Column(nullable = false)
     public String name;
+    @Lob
     public String description;
 
     public AppointmentCalendar() {}
@@ -31,6 +32,6 @@ public class AppointmentCalendar {
     }
 
     public AppointmentCalendar(Set<AppointmentSchedule> schedules, String name, String description) {
-        this(UUID.randomUUID(), schedules, name, description)
+        this(UUID.randomUUID(), schedules, name, description);
     }
 }

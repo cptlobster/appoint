@@ -16,7 +16,7 @@ import scala.jdk.CollectionConverters.*
 class AppointmentServlet(implicit val swagger: Swagger)
   extends ScalatraServlet
     with JacksonJsonSupport
-    with SwaggerSupport
+    // with SwaggerSupport
     with HibernateConnection {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
@@ -27,19 +27,28 @@ class AppointmentServlet(implicit val swagger: Swagger)
     sessionFactory.getSchemaManager.create(true)
   }
 
+  def getUuid: UUID = {
+    val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
+    uuidTry match {
+      case Success(uuid) => uuid
+      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
+    }
+  }
+
   before() {
     contentType = formats("json")
   }
 
-  private val getAppointments = (
-    apiOperation[List[Appointment]]("getAppointments")
-      summary "List all appointments for a user"
-  )
+//  private val getAppointments = (
+//    apiOperation[List[Appointment]]("getAppointments")
+//      summary "List all appointments for a user"
+//  )
 
   // get list of appointments for user
-  get("/", operation(getAppointments)) {
-    val appointments = sessionFactory.fromTransaction((session) => {
-      val query = "from appointments"
+//  get("/", operation(getAppointments)) {
+  get("/") {
+    val appointments = sessionFactory.fromTransaction(session => {
+      val query = "from Appointment"
       session.createSelectionQuery(query, classOf[Appointment])
         .getResultList
         .asScala
@@ -47,53 +56,54 @@ class AppointmentServlet(implicit val swagger: Swagger)
     appointments
   }
 
-  private val getAppointment = (
-    apiOperation[String]("getAppointment")
-      summary "Get information for a specific appointment"
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
-    )
+//  private val getAppointment = (
+//    apiOperation[String]("getAppointment")
+//      summary "Get information for a specific appointment"
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
+//    )
 
   // get information for an appointment
-  get("/:uuid", operation(getAppointment)) {
-    val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
-    uuidTry match {
-      case Success(uuid) =>
-        var appointment = Try(sessionFactory.fromTransaction((session) => {
-          val query = "from appointments where id = :uuid"
-          session.createSelectionQuery(query, classOf[Appointment])
-            .setParameter("uuid", uuid)
-            .getSingleResult
-        })) match {
-        case Success(a) => a
-        case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find appointment with ID $uuid.\"}")
-        case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
-        }
-        appointment
-      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
+//  get("/:uuid", operation(getAppointment)) {
+  get("/:uuid") {
+    val uuid = getUuid
+    var appointment = Try(sessionFactory.fromTransaction(session => {
+      val query = "from Appointment where id = :uuid"
+      session.createSelectionQuery(query, classOf[Appointment])
+        .setParameter("uuid", uuid)
+        .getSingleResult
+    })) match {
+    case Success(a) => a
+    case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find appointment with ID $uuid.\"}")
+    case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
     }
+    appointment
   }
 
-  private val modifyAppointment = (
-    apiOperation[String]("modifyAppointment")
-      summary "Modify details of a scheduled appointment"
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
-    )
+//  private val modifyAppointment = (
+//    apiOperation[String]("modifyAppointment")
+//      summary "Modify details of a scheduled appointment"
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
+//    )
 
 
   // modify an appointment
-  patch("/:uuid", operation(modifyAppointment)) {
+//  patch("/:uuid", operation(modifyAppointment)) {
+  patch("/:uuid") {
+    val uuid = getUuid
     "{\"implemented\":false}"
   }
 
-  private val cancelAppointment = (
-    apiOperation[Unit]("cancelAppointment")
-      summary "Cancel an existing appointment. If you are an attendee, this just removes your attendance; if you are " +
-      "the organizer then it cancels for all attendees."
-      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
-    )
+//  private val cancelAppointment = (
+//    apiOperation[Unit]("cancelAppointment")
+//      summary "Cancel an existing appointment. If you are an attendee, this just removes your attendance; if you are " +
+//      "the organizer then it cancels for all attendees."
+//      parameter queryParam[UUID]("uuid").paramType(ParamType.Path).description("The UUID for the appointment")
+//    )
 
   // cancel an appointment
-  delete("/:uuid", operation(cancelAppointment)) {
+//  delete("/:uuid", operation(cancelAppointment)) {
+  delete("/:uuid") {
+    val uuid = getUuid
     "{\"implemented\":false}"
   }
 }
