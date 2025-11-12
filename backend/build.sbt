@@ -15,8 +15,9 @@ lazy val appoint_backend = (project in file("."))
       "org.scalatra" %% "scalatra-scalatest-jakarta" % ScalatraVersion % "test",
       "org.json4s"   %% "json4s-jackson" % "4.0.7",
       "com.fasterxml.jackson.datatype" % "jackson-datatype-jsr310" % "2.20.1",
-      "org.mnode.ical4j" % "ical4j" % "4.2.0",
-      "ch.qos.logback" % "logback-classic" % "1.5.20" % "runtime",
+      "org.mnode.ical4j" % "ical4j" % "4.2.1",
+      "ch.qos.logback" % "logback-classic" % "1.5.21" % "runtime",
+      "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6",
       "jakarta.servlet" % "jakarta.servlet-api" % "6.0.0" % "provided",
       "org.hibernate.orm" % "hibernate-core" % HibernateVersion,
       "com.h2database" % "h2" % "2.4.240"

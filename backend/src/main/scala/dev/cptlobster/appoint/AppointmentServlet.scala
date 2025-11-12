@@ -1,5 +1,6 @@
 package dev.cptlobster.appoint
 
+import com.typesafe.scalalogging.LazyLogging
 import dev.cptlobster.appoint.orm.Appointment
 import jakarta.persistence.NoResultException
 import org.json4s.{DefaultFormats, Formats}
@@ -17,7 +18,8 @@ class AppointmentServlet(implicit val swagger: Swagger)
   extends ScalatraServlet
     with JacksonJsonSupport
     // with SwaggerSupport
-    with HibernateConnection {
+    with HibernateConnection
+    with LazyLogging {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
   protected val applicationDescription = "The Appoint scheduling system API. Exposes operations to manage appointments and appointment schedules."
@@ -31,7 +33,7 @@ class AppointmentServlet(implicit val swagger: Swagger)
     val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
     uuidTry match {
       case Success(uuid) => uuid
-      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
+      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"}")
     }
   }
 
@@ -74,7 +76,9 @@ class AppointmentServlet(implicit val swagger: Swagger)
     })) match {
     case Success(a) => a
     case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find appointment with ID $uuid.\"}")
-    case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
+    case scala.util.Failure(e) =>
+      logger.warn("Database query failed.", e)
+      halt(500, "{\"error\":\"Internal database error.\"}")
     }
     appointment
   }

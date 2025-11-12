@@ -1,9 +1,10 @@
 package dev.cptlobster.appoint
 
-import dev.cptlobster.appoint.orm.AppointmentSchedule
+import com.typesafe.scalalogging.LazyLogging
+import dev.cptlobster.appoint.orm.{AppointmentSchedule, Overlay}
 import jakarta.persistence.NoResultException
 import jakarta.servlet.ServletConfig
-import org.json4s.{DefaultFormats, Formats}
+import org.json4s.*
 import org.scalatra.*
 import org.scalatra.json.*
 import org.scalatra.swagger.*
@@ -15,8 +16,9 @@ import scala.util.{Failure, Success, Try}
 class ScheduleServlet(implicit val swagger: Swagger)
   extends ScalatraServlet
     with JacksonJsonSupport
-    with SwaggerSupport
-    with HibernateConnection {
+    // with SwaggerSupport
+    with HibernateConnection
+    with LazyLogging {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
   protected val applicationDescription = "The Appoint scheduling system API. Exposes operations to manage appointments and appointment schedules."
@@ -30,7 +32,7 @@ class ScheduleServlet(implicit val swagger: Swagger)
     val uuidTry: Try[UUID] = Try(UUID.fromString(params("uuid")))
     uuidTry match {
       case Success(uuid) => uuid
-      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"")
+      case Failure(exception) => halt(400, "{\"error\":\"Failed to parse UUID\"}")
     }
   }
 
@@ -43,7 +45,7 @@ class ScheduleServlet(implicit val swagger: Swagger)
 //      summary "List all appointment schedules for a user"
 //    )
 
-  // get all schedules for a user\
+  // get all schedules for a user
 //   get("/", operation(getSchedules)) {
   get("/") {
     val schedules = sessionFactory.fromTransaction((session) => {
@@ -66,13 +68,16 @@ class ScheduleServlet(implicit val swagger: Swagger)
   get("/:uuid") {
     val uuid = getUuid
     val schedule = Try(sessionFactory.fromTransaction(session => {
-      val query = "from AppointmentSchedule"
+      val query = "from AppointmentSchedule where id = :uuid"
       session.createSelectionQuery(query, classOf[AppointmentSchedule])
+        .setParameter("uuid", uuid)
         .getSingleResult
     })) match {
       case Success(a) => a
       case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find schedule with ID $uuid.\"}")
-      case Failure(e) => halt(500, s"{\"error\":\"Internal database conflict.\"}")
+      case scala.util.Failure(e) =>
+        logger.warn("Database query failed.", e)
+        halt(500, "{\"error\":\"Internal database error.\"}")
     }
     schedule
   }
@@ -87,7 +92,20 @@ class ScheduleServlet(implicit val swagger: Swagger)
 // get("/:uuid/overlays", operation(getScheduleOverlays)) {
   get("/:uuid/overlays") {
     val uuid = getUuid
-    "{\"implemented\":false}"
+    val overlays = Try(sessionFactory.fromTransaction(session => {
+      val query = "from Overlay where schedule_id = :uuid"
+      session.createSelectionQuery(query, classOf[Overlay])
+        .setParameter("uuid", uuid)
+        .getResultList
+        .asScala
+    })) match {
+      case Success(a) => a
+      case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find overlays for schedule $uuid.\"}")
+      case scala.util.Failure(e) =>
+        logger.warn("Database query failed.", e)
+        halt(500, "{\"error\":\"Internal database error.\"}")
+    }
+    overlays
   }
 
 //  private val getScheduleOverrides = (
@@ -122,8 +140,17 @@ class ScheduleServlet(implicit val swagger: Swagger)
   // create a schedule
 //  post("/", operation(createSchedule)) {
   post("/") {
-    val uuid = getUuid
-    "{\"implemented\":false}"
+    val newSchedule: AppointmentSchedule = parsedBody.extract[AppointmentSchedule]
+    val result = Try(sessionFactory.fromTransaction(session => {
+      val user = newSchedule.host
+      session.persist(newSchedule)
+    }))
+    result match {
+      case Success(v) => v
+      case Failure(e) =>
+        logger.error("Failed to commit to database", e)
+        halt(500, "{\"error\":\"Internal server error.\"}")
+    }
   }
 
 //  private val modifySchedule = (
@@ -151,5 +178,4 @@ class ScheduleServlet(implicit val swagger: Swagger)
     val uuid = getUuid
     "{\"implemented\":false}"
   }
-
 }

@@ -14,6 +14,9 @@ public class Overlay {
     @Id
     @GeneratedValue
     public UUID id;
+    @ManyToOne
+    @JoinColumn(name = "schedule_id", insertable = false, updatable = false)
+    public AppointmentSchedule schedule;
     @Column(nullable = false, length = 512)
     public URL url;
 
