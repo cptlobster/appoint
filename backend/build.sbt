@@ -1,5 +1,4 @@
 val ScalatraVersion = "3.1.2"
-val HibernateVersion = "7.1.7.Final"
 
 ThisBuild / scalaVersion := "3.3.4"
 ThisBuild / organization := "dev.cptlobster"
@@ -19,8 +18,6 @@ lazy val appoint_backend = (project in file("."))
       "ch.qos.logback" % "logback-classic" % "1.5.21" % "runtime",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6",
       "jakarta.servlet" % "jakarta.servlet-api" % "6.0.0" % "provided",
-      "org.hibernate.orm" % "hibernate-core" % HibernateVersion,
-      "com.h2database" % "h2" % "2.4.240"
     ),
   )
 

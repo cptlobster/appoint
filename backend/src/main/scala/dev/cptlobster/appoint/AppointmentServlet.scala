@@ -2,7 +2,6 @@ package dev.cptlobster.appoint
 
 import com.typesafe.scalalogging.LazyLogging
 import dev.cptlobster.appoint.orm.Appointment
-import jakarta.persistence.NoResultException
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.*
 import org.scalatra.json.*
@@ -18,7 +17,6 @@ class AppointmentServlet(implicit val swagger: Swagger)
   extends ScalatraServlet
     with JacksonJsonSupport
     // with SwaggerSupport
-    with HibernateConnection
     with LazyLogging {
   protected implicit lazy val jsonFormats: Formats = DefaultFormats
 
@@ -26,7 +24,6 @@ class AppointmentServlet(implicit val swagger: Swagger)
 
   override def init(config: ServletConfig): Unit = {
     super.init(config)
-    sessionFactory.getSchemaManager.create(true)
   }
 
   def getUuid: UUID = {
@@ -49,12 +46,7 @@ class AppointmentServlet(implicit val swagger: Swagger)
   // get list of appointments for user
 //  get("/", operation(getAppointments)) {
   get("/") {
-    val appointments = sessionFactory.fromTransaction(session => {
-      val query = "from Appointment"
-      session.createSelectionQuery(query, classOf[Appointment])
-        .getResultList
-        .asScala
-    })
+    val appointments = List()
     appointments
   }
 
@@ -68,19 +60,7 @@ class AppointmentServlet(implicit val swagger: Swagger)
 //  get("/:uuid", operation(getAppointment)) {
   get("/:uuid") {
     val uuid = getUuid
-    var appointment = Try(sessionFactory.fromTransaction(session => {
-      val query = "from Appointment where id = :uuid"
-      session.createSelectionQuery(query, classOf[Appointment])
-        .setParameter("uuid", uuid)
-        .getSingleResult
-    })) match {
-    case Success(a) => a
-    case Failure(e: NoResultException) => halt(404, s"{\"error\":\"Did not find appointment with ID $uuid.\"}")
-    case scala.util.Failure(e) =>
-      logger.warn("Database query failed.", e)
-      halt(500, "{\"error\":\"Internal database error.\"}")
-    }
-    appointment
+    "{\"implemented\":false}"
   }
 
 //  private val modifyAppointment = (
